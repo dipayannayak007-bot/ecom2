@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+outputs/
+data/raw/
+data/processed/
+data/survey_responses.csv
+data/transactions.csv
+*.sav
+*.dta
+*.xlsx
+*.xls
+.DS_Store
+Thumbs.db
+.vscode/
