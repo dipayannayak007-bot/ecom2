@@ -1,51 +1,224 @@
-# CNT-02 — India E-Commerce Market Growth and Consumer Segmentation (Python)
+# 📊 CNT-02 — India E-Commerce Market Growth & Consumer Segmentation
 
-A fully local Python project for India's e-commerce market, initially focused on electronics and appliances. No network calls or APIs are used when running the analysis.
+> **A fully offline Python-based analysis** of India's e-commerce market with a focus on the Electronics & Appliances segment.
 
-## Run offline
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
+![License](https://img.shields.io/badge/License-Academic-blue)
+![Offline](https://img.shields.io/badge/Runtime-Fully%20Offline-orange)
 
-1. Install Python 3.10+.
-2. Install dependencies once (internet access or local wheel files are required for first-time installation):
+---
 
-   `python -m pip install -r requirements.txt`
+## 📋 Project Description
 
-3. Disconnect from the internet and run:
+This project is an academic research study analysing **India's rapidly growing e-commerce market**, with an initial focus on the **electronics and appliances** segment. It combines publicly available market data from **IBEF** and **NITI Aayog** with an original consumer survey instrument to study market growth trends, build illustrative scenario forecasts, and explore consumer segmentation.
 
-   `python run_project.py`
+### 🎯 Objectives
 
-   On Windows, you can double-click `run_windows.bat`.
+- Visualise the trajectory of India's total e-commerce market (2021–2035) using official data
+- Benchmark the electronics & appliances and smartphones sub-segments
+- Build illustrative growth scenario projections (Conservative, Base, Optimistic)
+- Estimate Total Addressable Market (TAM) and Serviceable Addressable Market (SAM)
+- Design a consumer survey instrument for primary data collection
+- Provide an exploratory K-means clustering pipeline for consumer segmentation
+- Ensure the entire analysis runs **fully offline** — no APIs or internet dependencies
 
-The program creates `outputs/figures/` and `outputs/electronics_scenario_forecast.csv`.
+---
 
-## Visualisations and analysis
+## 📁 Project Structure
 
-- India e-commerce market trend line graph.
-- Selected electronics category comparison bar chart.
-- Conservative, base and optimistic scenario line graph.
-- TAM versus illustrative SAM chart.
-- Optional transaction-value histogram and category sales chart when `data/transactions.csv` is provided.
-- Optional survey charts for category preference, spending band, purchase frequency and price sensitivity when `data/survey_responses.csv` is provided.
-- Optional K-means clustering only when pre-coded numeric influence scores are supplied.
+```
+CNT02_Python_Offline/
+│
+├── run_project.py              # Main analysis script — generates all charts and data
+├── generate_report.py          # PDF report generator (16-page project report)
+├── requirements.txt            # Python package dependencies
+├── run_windows.bat             # Windows batch launcher
+├── README.md                   # This file
+├── .gitignore
+│
+├── data/
+│   ├── india_ecommerce_market.csv   # Market data from IBEF and NITI Aayog (11 observations)
+│   ├── survey_template.csv          # Schema for survey responses (14 fields)
+│   └── README.md                    # Data documentation
+│
+├── docs/
+│   └── survey_questionnaire.md      # Full 14-question consumer survey instrument
+│
+└── outputs/                         # Generated outputs (created on first run)
+    ├── figures/                     # PNG chart files
+    │   ├── 01_india_market_trend.png
+    │   ├── 02_category_benchmark.png
+    │   ├── 03_tam_scenarios.png
+    │   └── 04_tam_sam.png
+    ├── electronics_scenario_forecast.csv   # Scenario projection data (21 data points)
+    └── CNT02_Project_Report.pdf            # 16-page PDF project report
+```
 
-## Optional real data
+---
 
-Copy anonymised, consented survey responses to `data/survey_responses.csv` using `data/survey_template.csv` as the schema. For transaction analysis, add a permitted transaction extract to `data/transactions.csv` with at least `quantity` and `unit_price_inr`; recommended additional fields are order_id, customer_id, order_date, category, product, discount_inr and state.
+## 📊 Visualisations & Analysis
 
-No synthetic survey or transaction observations are included. Do not commit personal data or restricted datasets.
+The project generates **4 core charts** and additional optional charts:
 
-## Evidence and assumptions
+| # | Chart | Description |
+|---|-------|-------------|
+| 1 | **India E-Commerce Market Trend** | Time-series line chart showing market growth from US\$67bn (2021) to US\$550bn forecast (2035) |
+| 2 | **Electronics Category Benchmark** | Horizontal bar chart comparing Electronics & Appliances (US\$27bn) vs Smartphones (US\$39bn) |
+| 3 | **Growth Scenario Projections** | Three CAGR scenarios (8%, 12%, 16%) projecting electronics TAM from 2024 to 2030 |
+| 4 | **TAM vs SAM Sizing** | Bar chart comparing 2024 TAM (US\$27bn) with illustrative SAM (US\$8.1bn at 30% share) |
 
-- IBEF's August 2025 infographic reports India's total e-commerce market at US$125bn in 2024. The 2025 onward values in the supplied data are forecasts in that publication.
-- NITI Aayog Trade Watch Q2 FY2025-26 gives a 2024 estimate of US$27bn for online electronics and appliances and US$39bn for online smartphones. These are separate categories.
-- The scenario CAGRs (8%, 12%, 16%) and default SAM reachability factor (30%) are illustrative assumptions, not official forecasts or measured market shares.
-- MoSPI HCES measures household consumption expenditure, not online transactions.
+### Optional Charts (when data is provided)
+| # | Chart | Required Data |
+|---|-------|---------------|
+| 5 | Transaction Value Distribution | `data/transactions.csv` |
+| 6 | Net Sales by Category | `data/transactions.csv` |
+| 7-10 | Survey Analysis Charts | `data/survey_responses.csv` |
 
-## Sources
+---
 
-- NITI Aayog: https://niti.gov.in/sites/default/files/2026-02/Trade-Watch-Quarterly-July-September-Q2-FY-2025-26.pdf
-- IBEF: https://www.ibef.org/uploads/industry/Infrographics/large/e-Commerce-%20infographics-august-2025.pdf
-- MoSPI HCES: https://microdata.gov.in/NADA/index.php/catalog/CEXP
+## 📄 Reports
 
-## Limitations
+### PDF Project Report (`outputs/CNT02_Project_Report.pdf`)
 
-Convenience survey samples are not nationally representative. Self-reported price sensitivity is not observed price elasticity. The SAM share and growth scenarios must be validated with actual market evidence.
+A comprehensive **16-page PDF report** generated by `generate_report.py`, containing:
+
+| Chapter | Title |
+|---------|-------|
+| 1 | Executive Summary |
+| 2 | Introduction & Objectives |
+| 3 | Data Sources & Evidence |
+| 4 | Methodology |
+| 5 | Market Analysis & Visualisations |
+| 6 | Scenario Forecasting |
+| 7 | Survey Design |
+| 8 | Consumer Segmentation Approach |
+| 9 | Project Architecture |
+| 10 | Results Summary |
+| 11 | Limitations & Future Work |
+| 12 | References |
+
+The report includes embedded charts, data tables, the survey structure, and full methodology documentation.
+
+### Scenario Forecast Data (`outputs/electronics_scenario_forecast.csv`)
+
+Contains 21 data points (3 scenarios × 7 years) with projected TAM and illustrative SAM values:
+
+| Scenario | CAGR | TAM 2024 | TAM 2030 | SAM 2030 |
+|----------|------|----------|----------|----------|
+| Conservative | 8% | \$27.0bn | \$42.8bn | \$12.9bn |
+| Base | 12% | \$27.0bn | \$53.3bn | \$16.0bn |
+| Optimistic | 16% | \$27.0bn | \$65.8bn | \$19.7bn |
+
+---
+
+## 🛒 Survey Design
+
+A **14-question consumer survey** covering online electronics shopping behaviour in India:
+
+| Section | Questions | Focus Area |
+|---------|-----------|------------|
+| 1. Consent | Q1 | Informed voluntary consent |
+| 2. Demographics | Q2–Q4 | State/UT, residence type, age band |
+| 3. Shopping Behaviour | Q5–Q7 | Online purchase history, category, frequency |
+| 4. Spending & Sensitivity | Q8–Q10 | Spend band, price sensitivity, discount importance |
+| 5. Purchase Influences | Q11–Q14 | EMI, exchange offers, delivery cost, price threshold |
+
+Full survey: [`docs/survey_questionnaire.md`](docs/survey_questionnaire.md)
+
+---
+
+## 🚀 How to Run
+
+### Prerequisites
+- Python 3.10 or higher
+- pip (Python package manager)
+
+### Setup & Execution
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/dipayannayak007-bot/ecom2.git
+cd ecom2
+
+# 2. Install dependencies
+python -m pip install -r requirements.txt
+
+# 3. Run the main analysis (generates charts + data)
+python run_project.py
+
+# 4. Generate the PDF report
+python generate_report.py
+```
+
+On Windows, you can also double-click `run_windows.bat`.
+
+> **Note:** After installing dependencies, the entire analysis runs **fully offline** — no internet connection needed.
+
+---
+
+## 🛠 Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Python 3.10+ |
+| Data Processing | NumPy (≥1.24), pandas (≥2.0) |
+| Visualisation | Matplotlib (≥3.7) |
+| Clustering | scikit-learn (≥1.3) — optional |
+| PDF Generation | fpdf2 |
+| Runtime | Fully offline — no APIs or network calls |
+
+---
+
+## 📊 Key Findings
+
+- India's total e-commerce market grew from **US\$67bn** (2021) to **US\$125bn** (2024) — an **86% increase** over 3 years
+- IBEF forecasts project growth to **US\$345bn** by 2030 and **US\$550bn** by 2035
+- The online electronics & appliances segment was estimated at **US\$27bn** in 2024
+- Under the base case (12% CAGR), electronics TAM roughly doubles to **US\$53.3bn** by 2030
+
+---
+
+## 📚 Data Sources & References
+
+| # | Source | Description |
+|---|--------|-------------|
+| 1 | [IBEF (2025)](https://www.ibef.org/uploads/industry/Infrographics/large/e-Commerce-%20infographics-august-2025.pdf) | India E-Commerce Infographic, August 2025 |
+| 2 | [NITI Aayog (2026)](https://niti.gov.in/sites/default/files/2026-02/Trade-Watch-Quarterly-July-September-Q2-FY-2025-26.pdf) | Trade Watch Quarterly, Q2 FY 2025-26 |
+| 3 | [MoSPI HCES](https://microdata.gov.in/NADA/index.php/catalog/CEXP) | Household Consumer Expenditure Survey |
+
+---
+
+## ⚠️ Assumptions & Limitations
+
+### Assumptions
+- Scenario CAGRs (8%, 12%, 16%) are **illustrative**, not official forecasts
+- Default SAM reachability factor of 30% is an assumption for sizing exercises
+- IBEF's 2025+ values are forecasts published in that source, not measured outcomes
+
+### Limitations
+- Convenience survey samples are not nationally representative
+- Self-reported price sensitivity ≠ observed price elasticity
+- K-means segmentation (k=3) is exploratory; optimal k should be validated
+- MoSPI HCES measures household consumption expenditure, not online transactions
+
+---
+
+## 🔮 Future Work
+
+- Collect primary survey data across diverse Indian states and demographic groups
+- Validate scenario assumptions against additional industry reports
+- Incorporate transaction data analysis for empirical purchasing pattern insights
+- Test multiple values of k and use silhouette analysis for optimal cluster selection
+- Add regional (state-level) analysis of e-commerce adoption
+- Integrate time-series forecasting models (ARIMA, Prophet) for more rigorous projections
+
+---
+
+## 👤 Author
+
+**Dipayan Nayak**
+
+---
+
+*This project is for academic and research purposes only.*
