@@ -20,13 +20,17 @@ OUT = ROOT / "outputs"
 FIG = OUT / "figures"
 
 
-def open_image(path):
-    """Open an image file with the default Windows viewer."""
-    if sys.platform == "win32" and path.exists():
-        try:
-            os.startfile(str(path))
-        except Exception:
-            pass
+def save_figure_safely(fig, path):
+    """Save figure safely, retrying or saving under an alternative timestamp name if locked."""
+    fig.tight_layout()
+    try:
+        fig.savefig(path, dpi=220)
+        return path
+    except (OSError, PermissionError):
+        import time
+        alt_path = path.parent / f"{path.stem}_{int(time.time())}.png"
+        fig.savefig(alt_path, dpi=220)
+        return alt_path
 
 
 def setup():
@@ -47,9 +51,9 @@ def save_market_trend(df):
            xlabel="Year", ylabel="Market Value (US$ billion)")
     ax.grid(alpha=.25); ax.legend()
     path = FIG / "01_india_market_trend.png"
-    fig.tight_layout(); fig.savefig(path, dpi=220); plt.close(fig)
-    open_image(path)
-    print(f"  -> Generated: {path.name}")
+    saved = save_figure_safely(fig, path)
+    plt.close(fig)
+    print(f"  -> Generated: {saved.name}")
 
 
 def save_category_chart(df):
@@ -69,9 +73,9 @@ def save_category_chart(df):
            xlabel="Market Value (US$ billion)")
     ax.set_xlim(0, max(d.market_value_usd_bn) * 1.25); ax.grid(axis="x", alpha=.2)
     path = FIG / "02_category_benchmark.png"
-    fig.tight_layout(); fig.savefig(path, dpi=220); plt.close(fig)
-    open_image(path)
-    print(f"  -> Generated: {path.name}")
+    saved = save_figure_safely(fig, path)
+    plt.close(fig)
+    print(f"  -> Generated: {saved.name}")
 
 
 def scenario_table(tam, sam_share):
@@ -95,9 +99,9 @@ def save_scenario_chart(d):
            xlabel="Year", ylabel="Projected TAM (US$ billion)")
     ax.set_xticks(range(2024, 2031)); ax.grid(alpha=.25); ax.legend(title="Scenario")
     path = FIG / "03_tam_scenarios.png"
-    fig.tight_layout(); fig.savefig(path, dpi=220); plt.close(fig)
-    open_image(path)
-    print(f"  -> Generated: {path.name}")
+    saved = save_figure_safely(fig, path)
+    plt.close(fig)
+    print(f"  -> Generated: {saved.name}")
 
 
 def save_tam_sam(tam, share):
@@ -111,9 +115,9 @@ def save_tam_sam(tam, share):
             transform=ax.transAxes, ha="center", va="top", fontsize=9)
     ax.set_ylim(0, tam * 1.25); ax.grid(axis="y", alpha=.2)
     path = FIG / "04_tam_sam.png"
-    fig.tight_layout(); fig.savefig(path, dpi=220); plt.close(fig)
-    open_image(path)
-    print(f"  -> Generated: {path.name}")
+    saved = save_figure_safely(fig, path)
+    plt.close(fig)
+    print(f"  -> Generated: {saved.name}")
 
 
 def statistical_validation(df_market):
@@ -197,16 +201,18 @@ def analyse_transactions():
     ax.set(title="Distribution of Transaction Values", xlabel="Net transaction value (INR)", ylabel="Records")
     ax.grid(axis="y", alpha=.2); fig.tight_layout()
     img_path = FIG / "05_transaction_value_histogram.png"
-    fig.savefig(img_path, dpi=220); plt.close(fig)
-    open_image(img_path)
+    saved = save_figure_safely(fig, img_path)
+    plt.close(fig)
+    print(f"  -> Generated: {saved.name}")
     if "category" in d:
         bycat = d.groupby("category").net_value_inr.sum().sort_values()
         fig, ax = plt.subplots(figsize=(9, 6))
         bycat.plot(kind="barh", ax=ax, color="#39856A")
         ax.set(title="Net Sales by Category", xlabel="Net sales (INR)", ylabel="")
         img_path2 = FIG / "06_transaction_sales_by_category.png"
-        fig.tight_layout(); fig.savefig(img_path2, dpi=220); plt.close(fig)
-        open_image(img_path2)
+        saved = save_figure_safely(fig, img_path2)
+        plt.close(fig)
+        print(f"  -> Generated: {saved.name}")
     pd.DataFrame([{
         "records": len(d),
         "orders": d.order_id.nunique() if "order_id" in d else np.nan,
@@ -246,9 +252,9 @@ def analyse_survey():
         counts.sort_values().plot(kind="barh", ax=ax, color=color)
         ax.set(title=title, xlabel="Respondents", ylabel="")
         img_path = FIG / filename
-        fig.tight_layout(); fig.savefig(img_path, dpi=220); plt.close(fig)
-        open_image(img_path)
-        print(f"  -> Generated: {filename}")
+        saved = save_figure_safely(fig, img_path)
+        plt.close(fig)
+        print(f"  -> Generated: {saved.name}")
 
     # 2. Ordinal-to-Numeric Likert Mapping for K-Means Clustering
     influence_map = {
@@ -335,9 +341,9 @@ def analyse_survey():
             ax.legend(title="Segment")
             fig.tight_layout()
             cluster_img = FIG / "11_consumer_clusters.png"
-            fig.savefig(cluster_img, dpi=220); plt.close(fig)
-            open_image(cluster_img)
-            print(f"  -> Generated: {cluster_img.name}")
+            saved = save_figure_safely(fig, cluster_img)
+            plt.close(fig)
+            print(f"  -> Generated: {saved.name}")
 
         except ImportError:
             print("scikit-learn not available: skipping clustering.")
