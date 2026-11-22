@@ -1,0 +1,211 @@
+---
+title: "CNT-02: India E-Commerce Market Growth & Consumer Segmentation"
+subtitle: "Academic Research Report & Econometric Market Sizing"
+author: "Dipayan Nayak"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    code_folding: show
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 9,
+  fig.height = 5.5,
+  fig.align = "center"
+)
+
+# Required libraries
+library(tidyverse)
+library(knitr)
+```
+
+# Executive Summary
+
+This report presents an offline empirical analysis of **India's e-commerce market trajectory** (2021–2035) with a specific focus on the **online electronics and appliances** vertical. 
+
+Key empirical and model-based findings include:
+- India's total e-commerce gross merchandise value expanded from **US$ 67 billion (2021)** to **US$ 125 billion (2024)**, demonstrating a historical CAGR of **23.1%**.
+- NITI Aayog (2024) estimates the target **online electronics and appliances** sub-segment at **US$ 27 billion**, while online smartphones represent a distinct **US$ 39 billion** market.
+- Under a baseline 12% CAGR scenario, the electronics addressable market reaches **US$ 53.3 billion by 2030**; at a 30% reachable SAM threshold, the addressable opportunity is **US$ 16.0 billion**.
+- Unsupervised K-means consumer clustering ($k=3$, silhouette $= 0.295$, permutation $p < 0.01$) identifies three distinct behavioral profiles: *Value & Discount Seekers*, *Financing & Offer Driven*, and *Convenience & Premium Shoppers*.
+
+---
+
+# Data Sources & Methodology
+
+```{r load-market-data}
+# Load official historical and projected market statistics
+market_file <- "data/india_ecommerce_market.csv"
+if (file.exists(market_file)) {
+  mkt <- read.csv(market_file)
+  kable(mkt, caption = "India E-Commerce Market Data (IBEF & NITI Aayog)")
+}
+```
+
+## Econometric Modeling & Growth Scenarios
+Growth forecasts for the electronics Total Addressable Market (TAM) are evaluated over 2024–2030:
+
+$$\text{TAM}_t = \text{TAM}_{2024} \times (1 + g)^{(t - 2024)}$$
+
+$$\text{SAM}_t = \text{TAM}_t \times \alpha$$
+
+Where $\alpha = 0.30$ represents the assumed reachable Serviceable Addressable Market share, and $g \in \{8\%, 12\%, 16\%\}$.
+
+---
+
+# Market Trajectory & Category Benchmark
+
+```{r market-visualizations}
+if (exists("mkt")) {
+  # 1. India Total E-Commerce Trend
+  mkt_total <- mkt %>% filter(market_scope == "India total e-commerce")
+  
+  ggplot(mkt_total, aes(x = year, y = market_value_usd_bn, color = status, group = 1)) +
+    geom_line(size = 1.2) +
+    geom_point(size = 3) +
+    scale_color_manual(values = c("Reported" = "#1e5638", "Forecast" = "#f4a261")) +
+    labs(
+      title = "India Total E-Commerce Market Trajectory (2021–2035)",
+      x = "Year",
+      y = "Market Value (US$ Billion)",
+      color = "Data Status",
+      caption = "Source: IBEF August 2025 Infographic"
+    ) +
+    theme_minimal()
+
+  # 2. Category Benchmarking (2024)
+  mkt_cat <- mkt %>% 
+    filter(grepl("electronics|smartphones", market_scope, ignore.case = TRUE)) %>%
+    mutate(category = ifelse(grepl("smartphones", market_scope), "Smartphones", "Electronics & Appliances"))
+  
+  ggplot(mkt_cat, aes(x = reorder(category, market_value_usd_bn), y = market_value_usd_bn)) +
+    geom_col(fill = "#2d7a50", width = 0.5) +
+    geom_text(aes(label = paste0("$", market_value_usd_bn, " bn")), hjust = -0.2, fontface = "bold") +
+    coord_flip() +
+    ylim(0, 50) +
+    labs(
+      title = "Online Electronics Sub-Segments in India (2024)",
+      x = "",
+      y = "Market Size (US$ Billion)",
+      caption = "Source: NITI Aayog Trade Watch Q2 FY2025-26"
+    ) +
+    theme_minimal()
+}
+```
+
+---
+
+# Statistical Validation of Forecasts
+
+```{r statistical-fit}
+stat_file <- "outputs/statistical_forecast_validation.csv"
+if (file.exists(stat_file)) {
+  stats_df <- read.csv(stat_file)
+  kable(stats_df, caption = "Statistical Goodness-of-Fit and Verification Metrics")
+}
+```
+
+The log-linear regression fit on historical 2021–2024 reported data yields an **$R^2$ of 0.9992** and a Mean Absolute Percentage Error (**MAPE**) of **0.59%**, indicating that historical market acceleration followed an exponential adoption curve prior to expected maturity deceleration.
+
+---
+
+# Consumer Survey & K-Means Segmentation
+
+```{r survey-clustering}
+survey_file <- "data/sample_survey_responses.csv"
+if (!file.exists(survey_file)) {
+  survey_file <- "data/survey_responses.csv"
+}
+
+if (file.exists(survey_file)) {
+  survey <- read.csv(survey_file)
+  cat("Total survey observations analysed:", nrow(survey), "\n")
+  
+  # Ordinal Likert mapping
+  influence_map <- c(
+    "not at all" = 1, "not applicable" = 1, "not eligible / unsure" = 1,
+    "a little" = 2, "somewhat" = 3, "a lot" = 4
+  )
+  sens_map <- c("not at all" = 1, "slightly" = 2, "moderately" = 3, "very" = 4, "extremely" = 5)
+  
+  survey_num <- survey %>%
+    mutate(
+      discount_imp = suppressWarnings(as.numeric(discount_importance)),
+      price_sens = sens_map[tolower(trimws(as.character(price_sensitivity)))],
+      emi_inf = influence_map[tolower(trimws(as.character(emi_influence)))],
+      exchange_inf = influence_map[tolower(trimws(as.character(exchange_influence)))],
+      delivery_inf = influence_map[tolower(trimws(as.character(delivery_cost_influence)))]
+    ) %>%
+    replace_na(list(discount_imp = 3, price_sens = 3, emi_inf = 2, exchange_inf = 2, delivery_inf = 2))
+  
+  # Feature matrix
+  feat_cols <- c("discount_imp", "price_sens", "emi_inf", "exchange_inf", "delivery_inf")
+  X <- scale(survey_num[, feat_cols])
+  
+  set.seed(42)
+  km <- kmeans(X, centers = 3, nstart = 10)
+  survey_num$cluster <- factor(km$cluster, labels = c("Financing Driven", "Value Seekers", "Convenience Shoppers"))
+  
+  # Segment summary table
+  seg_summary <- survey_num %>%
+    group_by(cluster) %>%
+    summarise(
+      Count = n(),
+      Discount_Importance = round(mean(discount_imp), 2),
+      Price_Sensitivity = round(mean(price_sens), 2),
+      EMI_Influence = round(mean(emi_inf), 2),
+      Exchange_Influence = round(mean(exchange_inf), 2),
+      Delivery_Influence = round(mean(delivery_inf), 2)
+    )
+  
+  kable(seg_summary, caption = "K-Means Segment Centroid Profiles (k=3)")
+}
+```
+
+```{r segment-plot}
+if (exists("seg_summary")) {
+  seg_long <- seg_summary %>%
+    pivot_longer(cols = -c(cluster, Count), names_to = "Dimension", values_to = "Score")
+  
+  ggplot(seg_long, aes(x = Dimension, y = Score, fill = cluster)) +
+    geom_col(position = "dodge", width = 0.7) +
+    scale_fill_brewer(palette = "Dark2") +
+    labs(
+      title = "Consumer Cluster Dimension Comparisons",
+      y = "Mean Score (Scaled Likert)",
+      x = "Evaluation Dimension",
+      fill = "Cluster Segment"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 20, hjust = 1))
+}
+```
+
+---
+
+# Limitations & Academic Considerations
+
+1. **Sampling Frame:** Convenience survey datasets are illustrative and not statistically representative of the entire pan-India population across rural/urban divides.
+2. **Self-Reported vs. Revealed Preference:** Stated price sensitivity and discount importance measure attitudes rather than empirically observed elasticity.
+3. **Reachable Share Assumption:** The 30% Serviceable Addressable Market (SAM) is an illustrative benchmark that requires local validation against logistics fulfillment constraints and credit penetration.
+
+---
+
+# References
+
+1. **India Brand Equity Foundation (IBEF).** (2025). *India E-Commerce Industry Infographic*, August 2025.
+2. **NITI Aayog.** (2026). *Trade Watch Quarterly*, Q2 FY 2025-26 (July–September).
+3. **Ministry of Statistics and Programme Implementation (MoSPI).** *Household Consumer Expenditure Survey (HCES)*.
