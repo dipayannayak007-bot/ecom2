@@ -830,11 +830,23 @@ def build_report():
 
     # ---- Save ----
     OUT.mkdir(parents=True, exist_ok=True)
-    pdf.output(str(REPORT_PATH))
-    print(f"\nReport saved: {REPORT_PATH}")
+    target_path = REPORT_PATH
+    try:
+        pdf.output(str(target_path))
+    except PermissionError:
+        # File is locked in an active PDF viewer or browser tab
+        import time
+        target_path = OUT / f"CNT02_Project_Report_{int(time.time())}.pdf"
+        pdf.output(str(target_path))
+        print(f"\n[Notice] {REPORT_PATH.name} is currently open in your viewer/browser.")
+        print(f"Saved latest version as: {target_path.name}")
+    print(f"\nReport saved: {target_path}")
     print(f"Pages: {pdf.page_no()}")
     if sys.platform == "win32":
-        os.startfile(str(REPORT_PATH))
+        try:
+            os.startfile(str(target_path))
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
